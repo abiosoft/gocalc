@@ -3,7 +3,6 @@ package main
 import (
 	"gtk"
 	"os"
-	"unsafe"
 	"strings"
 	"strconv"
 )
@@ -15,20 +14,13 @@ var (
 	operators = "/x-+="
 )
 
-//to eliminate long declarations of
-//func(w *gtk.GtkWidget, args []unsafe.Pointer)
-func action(f func()) gtk.CallbackFunc {
-	return func(w *gtk.GtkWidget, args []unsafe.Pointer) {
-		f()
-	}
-}
 //closes the program
-func quit() gtk.CallbackFunc {
-	return action(func() { gtk.MainQuit() })
+func quit() {
+	gtk.MainQuit()
 }
 //action to be performed by each button
-func input(b *gtk.GtkButton) gtk.CallbackFunc {
-	return action(func() {
+func input(b *gtk.GtkButton) func() {
+	return func(){
 		if strings.Index(operators, b.GetLabel()) != -1 {
 			val, _ := strconv.Atof(screen.GetText())
 			calculation(val, b.GetLabel())
@@ -45,7 +37,7 @@ func input(b *gtk.GtkButton) gtk.CallbackFunc {
 				}
 			}
 		}
-	})
+	}
 }
 //main function
 func main() {
@@ -53,7 +45,7 @@ func main() {
 	screen = gtk.Entry()
 	window := gtk.Window(gtk.GTK_WINDOW_TOPLEVEL)
 	window.SetTitle("Simple Go Calculator")
-	window.Connect("destroy", quit(), nil)
+	window.Connect("destroy", quit, nil)
 
 	//vertical box containing all components
 	vbox := gtk.VBox(false, 1)
@@ -73,26 +65,26 @@ func main() {
 	filemenu.SetSubmenu(filesubmenu)
 
 	aboutmenuitem := gtk.MenuItemWithMnemonic("_About")
-	aboutmenuitem.Connect("activate", action(func() {
+	aboutmenuitem.Connect("activate", func() {
 		messagedialog := gtk.MessageDialog(
 			window.GetTopLevelAsWindow(),
 			gtk.GTK_DIALOG_MODAL,
 			gtk.GTK_MESSAGE_INFO,
 			gtk.GTK_BUTTONS_OK,
 			"Simple Go Calculator")
-		messagedialog.Response(action(func() {}), nil)
+		messagedialog.Response(func() {}, nil)
 		messagedialog.Run()
 		messagedialog.Destroy()
-	}),
+	},
 		nil)
 	filesubmenu.Append(aboutmenuitem)
 
 	resetmenuitem := gtk.MenuItemWithMnemonic("_Reset")
-	resetmenuitem.Connect("activate", action(func() { reset(); screen.SetText("0") }), nil)
+	resetmenuitem.Connect("activate", func() { reset(); screen.SetText("0")}, nil)
 	filesubmenu.Append(resetmenuitem)
 
 	exitmenuitem := gtk.MenuItemWithMnemonic("E_xit")
-	exitmenuitem.Connect("activate", quit(), nil)
+	exitmenuitem.Connect("activate", quit, nil)
 	filesubmenu.Append(exitmenuitem)
 
 	//vertical box containing all buttons
