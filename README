@@ -1,1 +1,7 @@
-Simple Go Calculator
+Simple Go Gtk Calculator using go-gtk (github.com/mattn/go-gtk)
+
+	go get github.com/abiosoft/gocalc
+
+Depends on go-gtk
+
+	go get github.com/mattn/go-gtk/gtk
